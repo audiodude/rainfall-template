@@ -4,16 +4,14 @@ import random
 import sys
 import os
 
-from flask import Flask, render_template
-from flask_flatpages import FlatPages
+from flask import Flask, render_template, request
 from flask_frozen import Freezer
+from pymongo import MongoClient
+
+client = MongoClient(connect=False)
+sites_db = client.sites
 
 app = Flask(__name__)
-app.config.update(
-  FLATPAGES_ROOT='songs',
-  FLATPAGES_EXTENSION = '.md'
-)
-songs = FlatPages(app)
 freezer = Freezer(app)
 
 song_colors = [
@@ -40,6 +38,10 @@ def _add_color(song, i):
 
 @app.route('/')
 def index():
+  if (os.environ.get('CHECK_REFERER') and
+      request.headers.get("Referer") != 'https://rainfall.dev/edit'):
+    return ('Not Authorized', 403)
+
   for i, song in enumerate(songs):
     _annotate(song, i)
 

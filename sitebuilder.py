@@ -42,14 +42,17 @@ def index():
       request.headers.get("Referer") != 'https://rainfall.dev/edit'):
     return ('Not Authorized', 403)
 
-  for i, song in enumerate(songs):
-    _annotate(song, i)
+  # for i, song in enumerate(songs):
+  #   _annotate(song, i)
 
-  sorted_songs = sorted(list(songs), key=lambda song: song.dt, reverse=True)
+  # sorted_songs = sorted(list(songs), key=lambda song: song.dt, reverse=True)
 
-  # Re-add the colors once the songs are sorted.
-  for i, song in enumerate(sorted_songs):
-    _add_color(song, i)
+  # # Re-add the colors once the songs are sorted.
+  # for i, song in enumerate(sorted_songs):
+  #   _add_color(song, i)
+
+  # TODO: Get the above working with mongo.
+  sorted_songs = []
 
   return render_template('index.html', songs=sorted_songs)
 

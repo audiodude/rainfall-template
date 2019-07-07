@@ -13,7 +13,7 @@ from flask_frozen import Freezer
 from pymongo import MongoClient
 
 client = MongoClient(connect=False)
-sites_db = client.sites
+rainfall_db= client.rainfall
 
 app = Flask(__name__)
 freezer = Freezer(app)

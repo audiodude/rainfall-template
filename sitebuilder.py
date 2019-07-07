@@ -1,10 +1,14 @@
 from collections import defaultdict
 from datetime import datetime
+import markdown
 import random
 import sys
 import os
 
-from flask import Flask, render_template, request
+from flask import Flask
+from flask import Markup
+from flask import render_template
+from flask import request
 from flask_frozen import Freezer
 from pymongo import MongoClient
 
@@ -42,6 +46,10 @@ def index():
       request.headers.get("Referer") != 'https://rainfall.dev/edit'):
     return ('Not Authorized', 403)
 
+  site_id = os.environ.get('RAINFALL_SITE_ID')
+  if site_id is None:
+    return ('Not Found', 404)
+
   # for i, song in enumerate(songs):
   #   _annotate(song, i)
 
@@ -54,7 +62,15 @@ def index():
   # TODO: Get the above working with mongo.
   sorted_songs = []
 
-  return render_template('index.html', songs=sorted_songs)
+  site = rainfall_db.sites.find_one({'site_id': site_id})
+  if site is None:
+    return ('Not Found', 404)
+
+  header = Markup(markdown.markdown(site['header']))
+  footer = Markup(markdown.markdown(site['footer']))
+
+  return render_template(
+    'index.html', songs=sorted_songs, header=header, footer=footer)
 
 @app.route('/<path:path>/')
 def song(path):

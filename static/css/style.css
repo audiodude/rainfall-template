@@ -39,6 +39,11 @@ h1 {
   margin: 20px;
 }
 
+header p {
+  color: #fff;
+  margin: 20px;
+}
+
 p {
   font-family: 'Roboto', sans-serif;
 }

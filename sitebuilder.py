@@ -54,7 +54,7 @@ def index():
 
   songs = site.get('songs', [])
 
-  for i, song in enumerate(songs)
+  for i, song in enumerate(songs):
     _annotate(song, i)
 
   sorted_songs = sorted(list(songs), key=lambda song: song['dt'], reverse=True)

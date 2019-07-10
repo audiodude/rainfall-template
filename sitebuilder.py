@@ -29,16 +29,14 @@ song_colors = [
 ]
 
 def _annotate(song, i):
-  if hasattr(song, 'slug'):
+  if 'src' in song:
     return
-  slug = os.path.basename(song.path)
-  song.src = '/static/mp3/' + slug + '.mp3'
-  song.slug = slug
-  song.dt = datetime.strptime(song.meta['date'], '%Y/%m/%d')
+  song['src'] = '/static/mp3/' + song['slug'] + '.mp3'
+  song['dt'] = datetime.strptime(song.meta['date_created'], '%Y/%m/%d')
   _add_color(song, i)
 
 def _add_color(song, i):
-  song.color = song_colors[i % len(song_colors)]
+  song['color'] = song_colors[i % len(song_colors)]
 
 @app.route('/')
 def index():
@@ -50,17 +48,18 @@ def index():
   if site_id is None:
     return ('Not Found', 404)
 
-  # for i, song in enumerate(songs):
-  #   _annotate(song, i)
+  site = rainfall_db.sites.find_one({'site_id': site_id})
+  if site is None:
+    return ('Not Found', 404)
 
-  # sorted_songs = sorted(list(songs), key=lambda song: song.dt, reverse=True)
+  for i, song in enumerate(site['songs']):
+    _annotate(song, i)
 
-  # # Re-add the colors once the songs are sorted.
-  # for i, song in enumerate(sorted_songs):
-  #   _add_color(song, i)
+  sorted_songs = sorted(list(songs), key=lambda song: song['dt'], reverse=True)
 
-  # TODO: Get the above working with mongo.
-  sorted_songs = []
+  # Re-add the colors once the songs are sorted.
+  for i, song in enumerate(sorted_songs):
+    _add_color(song, i)
 
   site = rainfall_db.sites.find_one({'site_id': site_id})
   if site is None:

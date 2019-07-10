@@ -52,7 +52,9 @@ def index():
   if site is None:
     return ('Not Found', 404)
 
-  for i, song in enumerate(site['songs']):
+  songs = site.get('songs', [])
+
+  for i, song in enumerate(songs)
     _annotate(song, i)
 
   sorted_songs = sorted(list(songs), key=lambda song: song['dt'], reverse=True)
@@ -60,10 +62,6 @@ def index():
   # Re-add the colors once the songs are sorted.
   for i, song in enumerate(sorted_songs):
     _add_color(song, i)
-
-  site = rainfall_db.sites.find_one({'site_id': site_id})
-  if site is None:
-    return ('Not Found', 404)
 
   header = Markup(markdown.markdown(site['header']))
   footer = Markup(markdown.markdown(site['footer']))

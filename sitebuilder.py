@@ -32,7 +32,7 @@ def _annotate(song, i):
   if 'src' in song:
     return
   song['src'] = '/static/mp3/' + song['slug'] + '.mp3'
-  song['dt'] = datetime.strptime(song['date_created'], '%Y/%m/%d')
+  song['dt'] = datetime.fromtimestamp(song['date_created'])
   _add_color(song, i)
 
 def _add_color(song, i):

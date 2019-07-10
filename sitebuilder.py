@@ -69,22 +69,44 @@ def index():
   return render_template(
     'index.html', songs=sorted_songs, header=header, footer=footer)
 
-@app.route('/<path:path>/')
-def song(path):
+@app.route('/<slug>/')
+def song(slug):
   related = defaultdict(list)
 
-  song = songs.get_or_404(path)
+  if (os.environ.get('CHECK_REFERER') and
+      'rainfall.dev' not in request.headers.get("Referer")):
+    return ('Not Authorized', 403)
+
+  site_id = os.environ.get('RAINFALL_SITE_ID')
+  if site_id is None:
+    return ('Not Found', 404)
+
+  site = rainfall_db.sites.find_one({'site_id': site_id})
+  if site is None:
+    return ('Not Found', 404)
+
+  songs = site.get('songs', [])
+  if not songs:
+    return flask.redirect('/')
+
+  for song in songs:
+    if song['slug'] == slug:
+      break
+
   _annotate(song, random.randrange(0, len(song_colors)))
 
-  for tag in song.meta['tags']:
+  faq = Markup(markdown.markdown(site.get('faq', '')))
+
+  for tag in song['tags']:
     for i, s in enumerate(songs):
-      if tag in s.meta['tags']:
+      if tag in s['tags']:
         _annotate(s, i)
-        if s.slug != song.slug:
+        if s['slug'] != song['slug']:
           related[tag].append(s)
-  song.related = related
-  song.src = '/static/mp3/' + os.path.basename(path) + '.mp3'
-  return render_template('song.html', song=song, title=song.meta['title'])
+  song['related'] = related
+  song['src'] = '/static/mp3/' + slug + '.mp3'
+  song['description_html'] = Markup(markdown.markdown(song['description']))
+  return render_template('song.html', song=song, title=song['name'])
 
 if __name__ == '__main__':
   if len(sys.argv) > 1 and sys.argv[1] == 'build':
